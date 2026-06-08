@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import reportData from '../api.json'
 import { reactive } from 'vue'
-import type { ReportImage, ReportTheme } from '@/types/report'
+import type { ArticleSlice, ReportImage, ReportPage, ReportTheme } from '@/types/report'
 import { createMockReportData } from '@/utils/mockReport'
 import { buildReportPages, getGalleryClass } from '@/utils/pagination'
 
@@ -15,7 +15,9 @@ const PORTRAIT_IMAGE_RATIO = 1 / LANDSCAPE_IMAGE_RATIO
 const SINGLE_IMAGE_ROW_HEIGHT_MM = 112
 const PAIR_IMAGE_ROW_HEIGHT_MM = 106
 const MULTI_IMAGE_MAX_HEIGHT_MM = 176
+const PAGE_FILL_GALLERY_MAX_HEIGHT_MM = 248
 const GALLERY_CONTENT_WIDTH_MM = 154
+const PAGE_FILL_GALLERY_CONTENT_WIDTH_MM = 168
 const FLOW_GAP_MM = 4
 
 interface MosaicItem {
@@ -127,13 +129,13 @@ function ratioTotal(ratios: number[]) {
   return ratios.reduce((total, ratio) => total + ratio, 0)
 }
 
-function fitRatioRow(ratios: number[], preferredRowHeight: number) {
+function fitRatioRow(ratios: number[], preferredRowHeight: number, contentWidth = GALLERY_CONTENT_WIDTH_MM) {
   const totalRatio = ratioTotal(ratios)
   const gapWidth = gapWidthMm(ratios)
   const preferredWidth = totalRatio * preferredRowHeight + gapWidth
   const rowHeight =
-    preferredWidth > GALLERY_CONTENT_WIDTH_MM
-      ? Math.max(1, (GALLERY_CONTENT_WIDTH_MM - gapWidth) / totalRatio)
+    preferredWidth > contentWidth
+      ? Math.max(1, (contentWidth - gapWidth) / totalRatio)
       : preferredRowHeight
   const width = totalRatio * rowHeight + gapWidth
 
@@ -269,24 +271,36 @@ function mosaicHeight(modules: MosaicModule[]) {
   return modules.reduce((total, module) => total + module.height, 0) + Math.max(0, modules.length - 1) * FLOW_GAP_MM
 }
 
-function mosaicMaxHeight(images: ReportImage[]) {
+function isPageFillingGallery(page: ReportPage, slice: ArticleSlice) {
+  return page.articles.length === 1 && !slice.includeHeader && !slice.text && slice.gallery.length > 0
+}
+
+function isPageFillingGalleryPage(page: ReportPage) {
+  const [slice] = page.articles
+
+  return slice !== undefined && isPageFillingGallery(page, slice)
+}
+
+function mosaicMaxHeight(images: ReportImage[], shouldFillPage = false) {
+  if (shouldFillPage) return PAGE_FILL_GALLERY_MAX_HEIGHT_MM
   return images.length === 2 ? PAIR_IMAGE_ROW_HEIGHT_MM : MULTI_IMAGE_MAX_HEIGHT_MM
 }
 
-function mosaicMetrics(images: ReportImage[]) {
-  const maxHeight = mosaicMaxHeight(images)
-  const fullWidthModules = mosaicModulesForWidth(images, GALLERY_CONTENT_WIDTH_MM)
+function mosaicMetrics(images: ReportImage[], shouldFillPage = false) {
+  const maxHeight = mosaicMaxHeight(images, shouldFillPage)
+  const contentWidth = shouldFillPage ? PAGE_FILL_GALLERY_CONTENT_WIDTH_MM : GALLERY_CONTENT_WIDTH_MM
+  const fullWidthModules = mosaicModulesForWidth(images, contentWidth)
 
   if (mosaicHeight(fullWidthModules) <= maxHeight) {
     return {
       height: mosaicHeight(fullWidthModules),
       modules: fullWidthModules,
-      width: GALLERY_CONTENT_WIDTH_MM,
+      width: contentWidth,
     }
   }
 
   let low = 1
-  let high = GALLERY_CONTENT_WIDTH_MM
+  let high = contentWidth
 
   for (let index = 0; index < 24; index += 1) {
     const width = (low + high) / 2
@@ -320,11 +334,15 @@ function imageRatiosForStyle(images: ReportImage[]) {
   return images.map((image) => imageRatio(image))
 }
 
-function galleryStyle(images: ReportImage[]) {
+function galleryStyle(images: ReportImage[], shouldFillPage = false) {
   const singleClass = singleImageClass(images)
   if (singleClass) {
     const ratios = imageRatiosForStyle(images)
-    const metrics = fitRatioRow(ratios, SINGLE_IMAGE_ROW_HEIGHT_MM)
+    const metrics = fitRatioRow(
+      ratios,
+      shouldFillPage ? PAGE_FILL_GALLERY_MAX_HEIGHT_MM : SINGLE_IMAGE_ROW_HEIGHT_MM,
+      shouldFillPage ? PAGE_FILL_GALLERY_CONTENT_WIDTH_MM : GALLERY_CONTENT_WIDTH_MM,
+    )
 
     return {
       '--ratio-gallery-height': `${formatTrackRatio(metrics.height)}mm`,
@@ -333,7 +351,7 @@ function galleryStyle(images: ReportImage[]) {
   }
 
   if (isMosaicGallery(images)) {
-    const metrics = mosaicMetrics(images)
+    const metrics = mosaicMetrics(images, shouldFillPage)
 
     return {
       '--mosaic-gallery-height': `${formatTrackRatio(metrics.height)}mm`,
@@ -344,8 +362,8 @@ function galleryStyle(images: ReportImage[]) {
   return {}
 }
 
-function mosaicModules(images: ReportImage[]) {
-  return mosaicMetrics(images).modules
+function mosaicModules(images: ReportImage[], shouldFillPage = false) {
+  return mosaicMetrics(images, shouldFillPage).modules
 }
 
 function moduleStyle(module: MosaicModule) {
@@ -433,7 +451,10 @@ const imageRatios = reactive<Record<string, number>>({})
       <div
         v-else
         class="content-card content-card--compact"
-        :class="{ 'content-card--single': page.articles.length === 1 }"
+        :class="{
+          'content-card--single': page.articles.length === 1,
+          'content-card--page-gallery': isPageFillingGalleryPage(page),
+        }"
       >
         <article
           v-for="(slice, index) in page.articles"
@@ -443,6 +464,7 @@ const imageRatios = reactive<Record<string, number>>({})
             'story-block--with-header': slice.includeHeader,
             'story-block--with-gallery': slice.gallery.length > 0,
             'story-block--gallery-only': !slice.includeHeader && !slice.text && slice.gallery.length > 0,
+            'story-block--page-gallery': isPageFillingGallery(page, slice),
           }"
         >
           <header v-if="slice.includeHeader" class="story-header">
@@ -462,11 +484,11 @@ const imageRatios = reactive<Record<string, number>>({})
             v-if="slice.gallery.length"
             class="gallery"
             :class="galleryClass(slice.gallery)"
-            :style="galleryStyle(slice.gallery)"
+            :style="galleryStyle(slice.gallery, isPageFillingGallery(page, slice))"
           >
             <template v-if="isMosaicGallery(slice.gallery)">
               <div
-                v-for="(module, moduleIndex) in mosaicModules(slice.gallery)"
+                v-for="(module, moduleIndex) in mosaicModules(slice.gallery, isPageFillingGallery(page, slice))"
                 :key="`${slice.article.content.title}-module-${moduleIndex}`"
                 class="gallery-module"
                 :class="`gallery-module--${module.kind}`"

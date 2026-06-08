@@ -224,6 +224,10 @@ button {
   padding-bottom: 10mm;
 }
 
+.content-card--page-gallery {
+  padding: 6mm;
+}
+
 .content-card--single .story-block {
   display: flex;
   flex: 1;
@@ -245,6 +249,10 @@ button {
 
 .story-block--with-header:not(:first-child) {
   padding-top: 2mm;
+}
+
+.story-block--page-gallery {
+  justify-content: center;
 }
 
 .content-card:not(.content-card--single) .story-block--with-gallery {

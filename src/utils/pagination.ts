@@ -8,6 +8,7 @@ const TEXT_WEIGHT_UNIT = 0.68
 const MIN_TEXT_WEIGHT = 0.68
 const MIN_TEXT_SLICE_CHARS = 42
 const SENTENCE_BREAKS = ['。', '！', '？', '；']
+const SOFT_BREAKS = ['，', '、', '：']
 const LEADING_PUNCTUATION = /^[，。！？；：、]+/
 
 function textWeight(text: string) {
@@ -47,6 +48,12 @@ function textCapacityChars(remaining: number) {
   return Math.max(0, Math.floor(remaining / TEXT_WEIGHT_UNIT) * TEXT_CHARS_PER_WEIGHT)
 }
 
+function findBreakAt(text: string, maxChars: number, marks: string[], minRatio: number) {
+  const latestBreak = Math.max(...marks.map((mark) => text.lastIndexOf(mark, maxChars)))
+
+  return latestBreak > Math.floor(maxChars * minRatio) ? latestBreak + 1 : 0
+}
+
 function splitText(text: string, maxChars: number) {
   const normalizedText = text.trimStart()
 
@@ -55,8 +62,10 @@ function splitText(text: string, maxChars: number) {
   if (normalizedText.length <= maxChars) return [normalizedText, ''] as const
 
   const safeMax = Math.max(1, maxChars)
-  const punctuationBreak = Math.max(...SENTENCE_BREAKS.map((mark) => normalizedText.lastIndexOf(mark, safeMax)))
-  const breakAt = punctuationBreak > Math.floor(safeMax * 0.55) ? punctuationBreak + 1 : safeMax
+  const breakAt =
+    findBreakAt(normalizedText, safeMax, SENTENCE_BREAKS, 0.55) ||
+    findBreakAt(normalizedText, safeMax, SOFT_BREAKS, 0.65) ||
+    safeMax
   if (breakAt < MIN_TEXT_SLICE_CHARS) return ['', normalizedText] as const
 
   let finalBreakAt = breakAt

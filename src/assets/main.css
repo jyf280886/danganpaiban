@@ -248,12 +248,11 @@ button {
 }
 
 .content-card:not(.content-card--single) .story-block--with-gallery {
-  flex: 1 1 0;
+  flex: 0 0 auto;
 }
 
 .content-card:not(.content-card--single) .story-block--with-gallery .gallery {
-  flex: 1 1 auto;
-  height: auto;
+  flex: 0 0 auto;
   min-height: 0;
 }
 

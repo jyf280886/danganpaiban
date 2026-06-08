@@ -178,10 +178,10 @@ button {
   display: grid;
   grid-template-columns: 15mm 1fr;
   gap: 4mm;
-  align-content: start;
-  min-height: 235mm;
-  margin: auto 0;
-  padding: 12mm 3mm 0;
+  flex: 1;
+  align-content: center;
+  min-height: 0;
+  padding: 0 3mm;
   color: #9b7800;
 }
 

@@ -484,7 +484,16 @@ const imageRatios = reactive<Record<string, number>>({})
             <time>{{ formatStoryDate(slice.article.content.date) }}</time>
           </header>
 
-          <p v-if="slice.text" class="story-text" :class="{ 'story-text--continuation': slice.isTextContinuation }">{{ slice.text }}</p>
+          <p
+            v-if="slice.text"
+            class="story-text"
+            :class="{
+              'story-text--continuation': slice.isTextContinuation,
+              'story-text--continues': slice.continuesText,
+            }"
+          >
+            {{ slice.text }}
+          </p>
 
           <div
             v-if="slice.gallery.length"

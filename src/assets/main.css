@@ -1,5 +1,23 @@
 @import './base.css';
 
+@font-face {
+  font-family: '优设好身体';
+  src: url('../../font/YouSheHaoShenTi.ttf') format('truetype');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: '思源黑体';
+  src:
+    url('../../font/SourceHanSansCN-Regular.otf') format('opentype'),
+    url('../../font/SourceHanSansCN-Normal.otf') format('opentype');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
 :root {
   --page-width: 210mm;
   --page-height: 297mm;
@@ -7,6 +25,9 @@
   --accent: #c99500;
   --ink: #4b4b4b;
   --flow-gap: 4mm;
+  --font-theme-title: '优设好身体', 'YouSheHaoShenTi', 'YouSheHaoShenTi-Regular', sans-serif;
+  --font-article-title: '思源黑体', 'Source Han Sans SC', 'Source Han Sans CN', 'Noto Sans CJK SC', sans-serif;
+  --font-content: '思源黑体', 'Source Han Sans SC', 'Source Han Sans CN', 'Noto Sans CJK SC', sans-serif;
 }
 
 html {
@@ -17,7 +38,8 @@ body {
   min-width: 1024px;
   background: #ece7d8;
   color: var(--ink);
-  font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
+  font-family: var(--font-content);
+  font-weight: 400;
 }
 
 button {
@@ -26,8 +48,9 @@ button {
   padding: 12px 22px;
   color: #fff;
   background: #c99600;
+  font-family: var(--font-content);
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 400;
   cursor: pointer;
   box-shadow: 0 10px 22px rgba(201, 150, 0, 0.25);
 }
@@ -61,8 +84,9 @@ button {
 .toolbar h1 {
   margin: 2px 0 4px;
   color: #3c3421;
+  font-family: var(--font-content);
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 400;
 }
 
 .toolbar p {
@@ -71,8 +95,9 @@ button {
 
 .eyebrow {
   color: var(--accent);
+  font-family: var(--font-content);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 400;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
@@ -139,8 +164,9 @@ button {
 .toc-card h2 {
   margin: 3mm 0 12mm;
   color: #3f382b;
+  font-family: var(--font-content);
   font-size: 34px;
-  font-weight: 900;
+  font-weight: 400;
 }
 
 .toc-card ul {
@@ -155,7 +181,9 @@ button {
   align-items: baseline;
   column-gap: 5mm;
   color: #1f2527;
+  font-family: var(--font-content);
   font-size: 14px;
+  font-weight: 400;
   line-height: 1.16;
 }
 
@@ -176,45 +204,50 @@ button {
   grid-row: 1;
   justify-self: end;
   color: #1b1b1b;
-  font-weight: 500;
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
 }
 
-.toc-theme {
+.toc-card li.toc-theme {
   margin-top: 6mm;
   margin-bottom: 1mm;
   color: #111;
+  font-family: var(--font-theme-title);
   font-size: 20px !important;
-  font-weight: 900;
+  font-weight: 400;
 }
 
-.toc-theme:first-child {
+.toc-card li.toc-theme:first-child {
   margin-top: 0;
 }
 
-.toc-theme b {
+.toc-card li.toc-theme b {
+  font-family: var(--font-content);
   font-size: 17px;
-  font-weight: 800;
+  font-weight: 400;
 }
 
-.toc-theme span {
-  font-weight: 900;
+.toc-card li.toc-theme span {
+  font-weight: 400;
   letter-spacing: 0.02em;
 }
 
-.toc-article {
+.toc-card li.toc-article {
   color: #333;
+  font-family: var(--font-article-title);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 700;
 }
 
-.toc-article span {
+.toc-card li.toc-article span {
   max-width: none;
 }
 
-.toc-article b {
+.toc-card li.toc-article b {
   color: #4b4b4b;
+  font-family: var(--font-content);
   font-size: 12px;
+  font-weight: 400;
 }
 
 .theme-cover {
@@ -247,8 +280,9 @@ button {
 .theme-cover h2 {
   margin: 0;
   color: #1f2f34;
+  font-family: var(--font-theme-title);
   font-size: 34px;
-  font-weight: 900;
+  font-weight: 400;
   line-height: 1.12;
   letter-spacing: 0.04em;
 }
@@ -256,8 +290,9 @@ button {
 .theme-cover h3 {
   margin: 4mm 0 0;
   color: #2b3a3f;
+  font-family: var(--font-content);
   font-size: 22px;
-  font-weight: 800;
+  font-weight: 400;
   line-height: 1.45;
 }
 
@@ -265,8 +300,9 @@ button {
   margin-top: 8mm;
   width: min(140mm, 100%);
   color: rgba(43, 55, 59, 0.84);
+  font-family: var(--font-content);
   font-size: 15px;
-  font-weight: 650;
+  font-weight: 400;
   line-height: 2.05;
   text-align: justify;
   text-indent: 0;
@@ -347,8 +383,9 @@ button {
   border-radius: 2mm;
   color: #fff;
   background: #68b4c3;
+  font-family: var(--font-content);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1;
 }
 
@@ -358,8 +395,9 @@ button {
   padding-left: 5mm;
   overflow-wrap: anywhere;
   color: #3f4648;
+  font-family: var(--font-article-title);
   font-size: 23px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.15;
 }
 
@@ -377,8 +415,9 @@ button {
 .story-text {
   margin: 0;
   color: #4e5557;
+  font-family: var(--font-content);
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 2.08;
   text-align: justify;
   text-indent: 2em;
@@ -390,6 +429,10 @@ button {
 
 .story-text--continuation {
   text-indent: 0;
+}
+
+.story-text--continues {
+  text-align-last: justify;
 }
 
 .gallery {
@@ -532,12 +575,13 @@ button {
   display: flex;
   justify-content: flex-end;
   color: #6b5a12;
+  font-family: var(--font-content);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .page-footer b {
-  font-weight: 900;
+  font-weight: 400;
 }
 
 @media print {

@@ -31,6 +31,7 @@ export interface ReportTheme {
 
 export interface ArticleSlice {
   article: ReportArticle
+  continuesText: boolean
   gallery: ReportImage[]
   includeHeader: boolean
   isTextContinuation: boolean

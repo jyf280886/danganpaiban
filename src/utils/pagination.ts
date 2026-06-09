@@ -14,6 +14,7 @@ const MULTI_IMAGE_HEIGHT_MM = 176
 const MAX_IMAGES_PER_SLICE = 6
 const LANDSCAPE_IMAGE_RATIO = 1.15
 const LEADING_PUNCTUATION = /^[，。！？；：、]+/
+const MIN_LAST_LINE_FILL_RATIO = 0.75
 const STORY_TEXT_FIRST_LINE_CHARS = 33
 const STORY_TEXT_LINE_CHARS = 35
 const IMAGE_RATIOS: Record<string, number> = {
@@ -177,37 +178,125 @@ function textCapacityChars(remainingHeight: number, isTextContinuation: boolean)
   return firstLineChars + Math.max(0, lineCount - 1) * STORY_TEXT_LINE_CHARS
 }
 
+function estimatedLineBounds(breakAt: number, isTextContinuation: boolean) {
+  const firstLineChars = isTextContinuation ? STORY_TEXT_LINE_CHARS : STORY_TEXT_FIRST_LINE_CHARS
+
+  if (breakAt <= firstLineChars) {
+    return {
+      lineStart: 0,
+      lineEnd: firstLineChars,
+    }
+  }
+
+  const charsAfterFirstLine = breakAt - firstLineChars
+  const lineIndex = Math.max(0, Math.ceil(charsAfterFirstLine / STORY_TEXT_LINE_CHARS) - 1)
+  const lineStart = firstLineChars + lineIndex * STORY_TEXT_LINE_CHARS
+
+  return {
+    lineStart,
+    lineEnd: lineStart + STORY_TEXT_LINE_CHARS,
+  }
+}
+
+function fillLastEstimatedLine(
+  breakAt: number,
+  maxBreakAt: number,
+  isTextContinuation: boolean,
+) {
+  const { lineStart, lineEnd } = estimatedLineBounds(breakAt, isTextContinuation)
+  const lineLength = lineEnd - lineStart
+  const currentFill = lineLength > 0 ? (breakAt - lineStart) / lineLength : 1
+
+  if (currentFill >= MIN_LAST_LINE_FILL_RATIO) return breakAt
+
+  return Math.min(lineEnd, maxBreakAt)
+}
+
+function avoidLeadingPunctuation(text: string, breakAt: number, minBreakAt: number) {
+  let safeBreakAt = breakAt
+
+  while (
+    safeBreakAt > minBreakAt &&
+    LEADING_PUNCTUATION.test(text.slice(safeBreakAt).trimStart())
+  ) {
+    safeBreakAt -= 1
+  }
+
+  return safeBreakAt
+}
+
+function pullLeadingPunctuation(
+  text: string,
+  breakAt: number,
+  maxBreakAt: number,
+  lineCapacity: number,
+  isTextContinuation: boolean,
+) {
+  const leadingPunctuation = text.slice(breakAt).match(LEADING_PUNCTUATION)?.[0] ?? ''
+  if (!leadingPunctuation) return breakAt
+
+  const pulledBreakAt = Math.min(breakAt + leadingPunctuation.length, maxBreakAt)
+  if (
+    pulledBreakAt > breakAt &&
+    estimatedTextLineCount(text.slice(0, pulledBreakAt), isTextContinuation) <= lineCapacity
+  ) {
+    return pulledBreakAt
+  }
+
+  return avoidLeadingPunctuation(text, breakAt, MIN_TEXT_SLICE_CHARS)
+}
+
 function splitText(text: string, maxChars: number, isTextContinuation = false) {
   const normalizedText = text.trimStart()
 
-  if (!normalizedText) return ['', ''] as const
-  if (maxChars < MIN_TEXT_SLICE_CHARS && normalizedText.length > maxChars) return ['', normalizedText] as const
-  if (normalizedText.length <= maxChars) return [normalizedText, ''] as const
+  if (!normalizedText) return { current: '', next: '', continues: false } as const
+  if (maxChars < MIN_TEXT_SLICE_CHARS && normalizedText.length > maxChars) {
+    return { current: '', next: normalizedText, continues: true } as const
+  }
+  if (normalizedText.length <= maxChars) {
+    return { current: normalizedText, next: '', continues: false } as const
+  }
 
   const safeMax = Math.max(1, maxChars)
   const breakAt = Math.min(normalizedText.length, safeMax)
-  if (breakAt < MIN_TEXT_SLICE_CHARS) return ['', normalizedText] as const
+  if (breakAt < MIN_TEXT_SLICE_CHARS) {
+    return { current: '', next: normalizedText, continues: true } as const
+  }
 
   const lineCapacity = estimatedTextLineCount(normalizedText.slice(0, breakAt), isTextContinuation)
 
-  let finalBreakAt = breakAt
-  const leadingPunctuation = normalizedText.slice(finalBreakAt).match(LEADING_PUNCTUATION)?.[0] ?? ''
-  finalBreakAt += leadingPunctuation.length
+  let maxBreakAt = breakAt
+  let finalBreakAt = fillLastEstimatedLine(breakAt, maxBreakAt, isTextContinuation)
+  finalBreakAt = pullLeadingPunctuation(
+    normalizedText,
+    finalBreakAt,
+    maxBreakAt,
+    lineCapacity,
+    isTextContinuation,
+  )
 
   const remainingLength = normalizedText.length - finalBreakAt
 
   if (remainingLength > 0 && remainingLength < MIN_TEXT_SLICE_CHARS) {
-    finalBreakAt = Math.max(finalBreakAt, MIN_TEXT_SLICE_CHARS, normalizedText.length - MIN_TEXT_SLICE_CHARS)
-  }
+    const balancedBreakAt = normalizedText.length - MIN_TEXT_SLICE_CHARS
 
-  if (estimatedTextLineCount(normalizedText.slice(0, finalBreakAt), isTextContinuation) > lineCapacity) {
-    finalBreakAt = breakAt
+    if (balancedBreakAt >= MIN_TEXT_SLICE_CHARS) {
+      maxBreakAt = Math.min(maxBreakAt, balancedBreakAt)
+      finalBreakAt = fillLastEstimatedLine(balancedBreakAt, maxBreakAt, isTextContinuation)
+      finalBreakAt = pullLeadingPunctuation(
+        normalizedText,
+        finalBreakAt,
+        maxBreakAt,
+        lineCapacity,
+        isTextContinuation,
+      )
+    }
   }
 
   const current = normalizedText.slice(0, finalBreakAt).trim()
   const next = normalizedText.slice(finalBreakAt).trimStart()
 
-  return [current, next] as const
+  return { current, next, continues: Boolean(next) } as const
 }
 
 function firstStringArray(...values: Array<string[] | undefined>) {
@@ -274,6 +363,7 @@ function createPage(
 function makeSlice(article: ReportArticle, options: Partial<ArticleSlice>): ArticleSlice {
   return {
     article,
+    continuesText: options.continuesText ?? false,
     gallery: options.gallery ?? [],
     includeHeader: options.includeHeader ?? false,
     isTextContinuation: options.isTextContinuation ?? false,
@@ -356,7 +446,11 @@ export function buildReportPages(themes: ReportTheme[]) {
           availableAfterHeader - textGapHeight,
           isTextContinuation,
         )
-        const [textPart, nextText] = splitText(remainingText, maxTextChars, isTextContinuation)
+        const { current: textPart, next: nextText, continues: continuesText } = splitText(
+          remainingText,
+          maxTextChars,
+          isTextContinuation,
+        )
         let gallery: ReportImage[] = []
         let usedText = textPart
         let nextRemainingText = nextText
@@ -409,6 +503,7 @@ export function buildReportPages(themes: ReportTheme[]) {
         addSlice(
           makeSlice(article, {
             gallery,
+            continuesText: continuesText && Boolean(usedText),
             includeHeader,
             isTextContinuation: isTextContinuation && Boolean(usedText),
             text: usedText,

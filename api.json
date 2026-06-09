@@ -2,7 +2,11 @@
     {
         "theme": "autumn",
         "background": {
-            "image": "/images/bg1.webp",
+            "image": "/images/theme1.jpg",
+            "content-images": [
+                "/images/bg1.jpg",
+                "/images/bg2.jpg"
+            ],
             "color": "#F7E68A"
         },
         "header": {
@@ -62,6 +66,10 @@
         "theme": "autumn",
         "background": {
             "image": "/images/bg2.webp",
+            "content-images": [
+                "/images/bg2.jpg",
+                "/images/bg3.jpg"
+            ],
             "color": "#F7E68A"
         },
         "header": {

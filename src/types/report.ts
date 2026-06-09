@@ -14,8 +14,13 @@ export interface ReportArticle {
 
 export interface ReportTheme {
   theme: string
+  image?: string
+  'content-images'?: string[]
+  'content-imagesm'?: string[]
   background: {
     image: string
+    'content-images'?: string[]
+    'content-imagesm'?: string[]
     color: string
   }
   header: {
@@ -39,6 +44,7 @@ export interface ReportPage {
   pageNumber: number
   globalPageNumber: number
   theme: ReportTheme
+  backgroundImage: string
   isThemeStart: boolean
   articles: ArticleSlice[]
 }

@@ -120,6 +120,47 @@ function splitText(text: string, maxChars: number, isTextContinuation = false) {
   return [current, next] as const
 }
 
+function firstStringArray(...values: Array<string[] | undefined>) {
+  return values.find((value) => Array.isArray(value) && value.length > 0) ?? []
+}
+
+function stableIndex(seed: string, count: number) {
+  let hash = 2166136261
+
+  for (let index = 0; index < seed.length; index += 1) {
+    hash ^= seed.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
+  }
+
+  hash += hash << 13
+  hash ^= hash >>> 7
+  hash += hash << 3
+  hash ^= hash >>> 17
+  hash += hash << 5
+
+  return (hash >>> 0) % count
+}
+
+function themeBackgroundImage(theme: ReportTheme) {
+  return theme.image || theme.background.image
+}
+
+function contentBackgroundImages(theme: ReportTheme) {
+  return firstStringArray(
+    theme['content-imagesm'],
+    theme.background['content-imagesm'],
+    theme['content-images'],
+    theme.background['content-images'],
+  ).filter((image) => image.trim().length > 0)
+}
+
+function contentBackgroundImage(theme: ReportTheme, themeIndex: number, pageNumber: number, globalPageNumber: number) {
+  const images = contentBackgroundImages(theme)
+  if (images.length === 0) return themeBackgroundImage(theme)
+
+  return images[stableIndex(`${theme.theme}:${themeIndex}:${pageNumber}:${globalPageNumber}`, images.length)] ?? images[0] ?? themeBackgroundImage(theme)
+}
+
 function createPage(
   theme: ReportTheme,
   themeIndex: number,
@@ -134,6 +175,9 @@ function createPage(
     pageNumber,
     globalPageNumber,
     theme,
+    backgroundImage: isThemeStart
+      ? themeBackgroundImage(theme)
+      : contentBackgroundImage(theme, themeIndex, pageNumber, globalPageNumber),
     isThemeStart,
     articles,
   }

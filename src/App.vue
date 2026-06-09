@@ -9,7 +9,7 @@ const DEFAULT_MOCK_COUNT = 20
 const DEFAULT_MOCK_THEME_COUNT = 3
 const MAX_MOCK_COUNT = 120
 const MAX_MOCK_THEME_COUNT = 12
-const TOC_ITEMS_PER_PAGE = 15
+const TOC_ITEMS_PER_PAGE = 20
 const LANDSCAPE_IMAGE_RATIO = 1.15
 const PORTRAIT_IMAGE_RATIO = 1 / LANDSCAPE_IMAGE_RATIO
 const SINGLE_IMAGE_ROW_HEIGHT_MM = 112
@@ -84,6 +84,13 @@ function paginateToc(items: typeof toc) {
 
 function printReport() {
   globalThis.print()
+}
+
+function formatStoryDate(date: string) {
+  const [year, month, day] = date.split('/')
+  if (!year || !month || !day) return date.replaceAll('/', '.')
+
+  return `${year}.${month.padStart(2, '0')}.${day.padStart(2, '0')}`
 }
 
 function readRatio(event: Event, image: ReportImage) {
@@ -426,7 +433,6 @@ const imageRatios = reactive<Record<string, number>>({})
         </ul>
       </div>
       <footer class="page-footer">
-        <span>目录</span>
         <b>{{ tocPageIndex + 1 }}</b>
       </footer>
     </section>
@@ -435,9 +441,10 @@ const imageRatios = reactive<Record<string, number>>({})
       v-for="page in pages"
       :key="page.id"
       class="sheet report-sheet"
+      :class="{ 'report-sheet--theme': page.isThemeStart }"
       :style="{
         '--theme-bg': page.theme.background.color,
-        '--theme-image': `url(${page.theme.background.image})`,
+        '--theme-image': `url(${page.backgroundImage})`,
       }"
     >
       <div v-if="page.isThemeStart" class="theme-cover">
@@ -468,14 +475,8 @@ const imageRatios = reactive<Record<string, number>>({})
           }"
         >
           <header v-if="slice.includeHeader" class="story-header">
-            <time>
-              <strong>{{ slice.article.content.date.split('/').at(-1) }}</strong>
-              <span>{{ slice.article.content.date.slice(0, 7) }}</span>
-            </time>
-            <div>
-              <h3>{{ slice.article.content.title }}</h3>
-              <p class="meta">👶 老师记　　💛 亲子活动</p>
-            </div>
+            <h3>{{ slice.article.content.title }}</h3>
+            <time>{{ formatStoryDate(slice.article.content.date) }}</time>
           </header>
 
           <p v-if="slice.text" class="story-text" :class="{ 'story-text--continuation': slice.isTextContinuation }">{{ slice.text }}</p>
@@ -540,7 +541,6 @@ const imageRatios = reactive<Record<string, number>>({})
       </div>
 
       <footer class="page-footer">
-        <span>{{ page.theme.header.title }}</span>
         <b>{{ page.globalPageNumber + tocPageOffset }}</b>
       </footer>
     </section>

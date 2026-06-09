@@ -91,6 +91,7 @@ export function createMockReportData(
       background: baseTheme.background,
       header: {
         title: `${baseTheme.header.title} · 动态主题 ${themeIndex + 1}`,
+        subtitle: baseTheme.header.subtitle,
         description: `${baseTheme.header.description}${textSeeds[themeIndex % textSeeds.length] ?? textSeeds[0] ?? ""}`,
       },
       pages: Array.from({ length: articlesInTheme }, (_, articleIndex) =>

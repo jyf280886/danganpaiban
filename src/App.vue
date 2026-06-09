@@ -9,7 +9,7 @@ const DEFAULT_MOCK_COUNT = 20
 const DEFAULT_MOCK_THEME_COUNT = 3
 const MAX_MOCK_COUNT = 120
 const MAX_MOCK_THEME_COUNT = 12
-const TOC_ITEMS_PER_PAGE = 20
+const TOC_ITEMS_PER_PAGE = 32
 const LANDSCAPE_IMAGE_RATIO = 1.15
 const PORTRAIT_IMAGE_RATIO = 1 / LANDSCAPE_IMAGE_RATIO
 const SINGLE_IMAGE_ROW_HEIGHT_MM = 112
@@ -84,6 +84,10 @@ function paginateToc(items: typeof toc) {
 
 function printReport() {
   globalThis.print()
+}
+
+function formatTocPageNumber(pageNumber: number) {
+  return String(pageNumber).padStart(2, '0')
 }
 
 function formatStoryDate(date: string) {
@@ -428,7 +432,7 @@ const imageRatios = reactive<Record<string, number>>({})
           >
             <span>{{ item.title }}</span>
             <i />
-            <b>{{ item.pageNumber + tocPageOffset }}</b>
+            <b>{{ formatTocPageNumber(item.pageNumber + tocPageOffset) }}</b>
           </li>
         </ul>
       </div>

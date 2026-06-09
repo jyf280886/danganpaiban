@@ -108,7 +108,7 @@ button {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: 70mm 28mm 18mm;
+  padding: 56mm 32mm 18mm;
   background-color: #77db21;
   background-image: url('/images/mulu.jpg');
   background-repeat: no-repeat;
@@ -145,47 +145,76 @@ button {
 
 .toc-card ul {
   display: grid;
-  gap: 11px;
+  gap: 2mm;
   list-style: none;
 }
 
 .toc-card li {
   display: grid;
-  grid-template-columns: minmax(0, auto) minmax(16mm, 1fr) auto;
-  align-items: end;
-  gap: 10px;
-  color: #376916;
-  font-size: 17px;
+  grid-template-columns: 11mm minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 5mm;
+  color: #1f2527;
+  font-size: 14px;
+  line-height: 1.16;
 }
 
 .toc-card li span {
+  grid-column: 2;
+  grid-row: 1;
   min-width: 0;
-  max-width: 108mm;
+  max-width: none;
   overflow-wrap: anywhere;
 }
 
 .toc-card li i {
-  border-bottom: 1px dotted rgba(55, 105, 22, 0.38);
-  transform: translateY(-5px);
+  display: none;
 }
 
 .toc-card li b {
-  color: #4b9f16;
-  font-weight: 900;
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: end;
+  color: #1b1b1b;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .toc-theme {
-  margin-top: 6px;
-  font-size: 21px !important;
+  margin-top: 6mm;
+  margin-bottom: 1mm;
+  color: #111;
+  font-size: 20px !important;
   font-weight: 900;
 }
 
+.toc-theme:first-child {
+  margin-top: 0;
+}
+
+.toc-theme b {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.toc-theme span {
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
 .toc-article {
-  padding-left: 9mm;
+  color: #333;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .toc-article span {
-  max-width: 96mm;
+  max-width: none;
+}
+
+.toc-article b {
+  color: #4b4b4b;
+  font-size: 12px;
 }
 
 .theme-cover {
@@ -278,6 +307,7 @@ button {
 
 .story-block {
   display: flex;
+  flex-shrink: 0;
   min-height: 0;
   flex-direction: column;
   gap: 5mm;

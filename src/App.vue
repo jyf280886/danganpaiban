@@ -449,8 +449,9 @@ const imageRatios = reactive<Record<string, number>>({})
     >
       <div v-if="page.isThemeStart" class="theme-cover">
         <div class="quote-mark">“</div>
-        <div>
+        <div class="theme-copy">
           <h2>{{ page.theme.header.title }}</h2>
+          <h3 v-if="page.theme.header.subtitle">{{ page.theme.header.subtitle }}</h3>
           <p>{{ page.theme.header.description }}</p>
         </div>
       </div>

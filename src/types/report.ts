@@ -15,16 +15,15 @@ export interface ReportArticle {
 export interface ReportTheme {
   theme: string
   image?: string
-  'content-images'?: string[]
-  'content-imagesm'?: string[]
+  contentImages?: string[]
   background: {
     image: string
-    'content-images'?: string[]
-    'content-imagesm'?: string[]
+    contentImages?: string[]
     color: string
   }
   header: {
     title: string
+    subtitle?: string
     description: string
   }
   pages: ReportArticle[]

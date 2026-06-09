@@ -101,6 +101,7 @@ button {
 .report-sheet--theme {
   background-color: transparent;
   background-size: cover;
+  padding: 34mm 20mm 16mm;
 }
 
 .toc-sheet {
@@ -188,38 +189,58 @@ button {
 }
 
 .theme-cover {
-  display: grid;
-  grid-template-columns: 15mm 1fr;
-  gap: 4mm;
+  position: relative;
+  display: block;
   flex: 1;
-  align-content: center;
   min-height: 0;
-  padding: 0 3mm;
-  color: #9b7800;
+  color: #2c3436;
+}
+
+.theme-copy {
+  position: relative;
+  z-index: 1;
+  width: min(150mm, 100%);
+  padding-top: 12mm;
 }
 
 .quote-mark {
+  position: absolute;
+  top: 0;
+  left: -4mm;
+  color: rgba(255, 255, 255, 0.52);
   font-family: Georgia, serif;
-  font-size: 34mm;
+  font-size: 40mm;
   font-weight: 900;
-  line-height: 0.8;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(79, 160, 169, 0.08);
 }
 
 .theme-cover h2 {
-  margin-top: 6mm;
-  color: #b18400;
-  font-size: 31px;
+  margin: 0;
+  color: #1f2f34;
+  font-size: 34px;
   font-weight: 900;
-  letter-spacing: 0.05em;
+  line-height: 1.12;
+  letter-spacing: 0.04em;
+}
+
+.theme-cover h3 {
+  margin: 4mm 0 0;
+  color: #2b3a3f;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.45;
 }
 
 .theme-cover p {
-  margin-top: 11mm;
-  padding-right: 10mm;
+  margin-top: 8mm;
+  width: min(140mm, 100%);
+  color: rgba(43, 55, 59, 0.84);
   font-size: 15px;
-  font-weight: 600;
-  line-height: 2.2;
+  font-weight: 650;
+  line-height: 2.05;
   text-align: justify;
+  text-indent: 0;
 }
 
 .content-card {

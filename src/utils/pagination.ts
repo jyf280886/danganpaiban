@@ -147,10 +147,8 @@ function themeBackgroundImage(theme: ReportTheme) {
 
 function contentBackgroundImages(theme: ReportTheme) {
   return firstStringArray(
-    theme['content-imagesm'],
-    theme.background['content-imagesm'],
-    theme['content-images'],
-    theme.background['content-images'],
+    theme.contentImages,
+    theme.background.contentImages,
   ).filter((image) => image.trim().length > 0)
 }
 

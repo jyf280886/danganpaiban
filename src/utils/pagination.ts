@@ -454,6 +454,13 @@ export function buildReportPages(themes: ReportTheme[]) {
         let gallery: ReportImage[] = []
         let usedText = textPart
         let nextRemainingText = nextText
+        const shouldRestartArticleForTextSplit =
+          includeHeader && currentArticles.length > 0 && Boolean(nextText)
+
+        if (shouldRestartArticleForTextSplit) {
+          pushContentPage()
+          continue
+        }
 
         if (!usedText && remainingText && currentArticles.length > 0) {
           pushContentPage()
@@ -477,6 +484,19 @@ export function buildReportPages(themes: ReportTheme[]) {
         if (remainingImages.length > 0 && take > 0) {
           gallery = remainingImages.slice(0, take)
           remainingImages = remainingImages.slice(take)
+        }
+
+        const shouldRestartArticleForImageSplit =
+          includeHeader &&
+          currentArticles.length > 0 &&
+          Boolean(usedText) &&
+          !nextRemainingText &&
+          gallery.length === 0 &&
+          remainingImages.length > 0
+
+        if (shouldRestartArticleForImageSplit) {
+          pushContentPage()
+          continue
         }
 
         if (!usedText && gallery.length === 0 && remainingImages.length > 0) {

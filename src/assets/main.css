@@ -314,7 +314,8 @@ button {
   display: flex;
   flex: 1;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
+  justify-content: safe center;
   gap: 5mm;
   min-height: 0;
   padding: 9mm 13mm;
@@ -331,7 +332,7 @@ button {
 
 .content-card--single .story-block {
   display: flex;
-  flex: 1;
+  flex: 0 0 auto;
   min-height: 0;
   flex-direction: column;
 }

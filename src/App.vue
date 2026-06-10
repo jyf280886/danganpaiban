@@ -20,6 +20,7 @@ const GALLERY_CONTENT_WIDTH_MM = 154
 const PAGE_FILL_GALLERY_CONTENT_WIDTH_MM = 168
 const FLOW_GAP_MM = 4
 const FRONT_COVER_PAGE_COUNT = 1
+const PORTRAIT_SINGLE_IMAGE_MAX_WIDTH_RATIO = 0.5
 
 interface MosaicItem {
   image: ReportImage
@@ -44,7 +45,7 @@ const mockThemeCount = readPositiveIntegerParam('themes', DEFAULT_MOCK_THEME_COU
 const themes = useMockData
   ? createMockReportData(reportData as ReportTheme[], mockCount, mockThemeCount)
   : (reportData as ReportTheme[])
-const { pages, toc, totalPages } = buildReportPages(themes)
+const { pages, toc } = buildReportPages(themes)
 const tocPages = paginateToc(toc)
 const tocPageOffset = FRONT_COVER_PAGE_COUNT + tocPages.length
 
@@ -350,10 +351,15 @@ function galleryStyle(images: ReportImage[], shouldFillPage = false) {
   const singleClass = singleImageClass(images)
   if (singleClass) {
     const ratios = imageRatiosForStyle(images)
+    const contentWidth = shouldFillPage ? PAGE_FILL_GALLERY_CONTENT_WIDTH_MM : GALLERY_CONTENT_WIDTH_MM
+    const maxWidth =
+      singleClass === 'gallery--single-portrait'
+        ? contentWidth * PORTRAIT_SINGLE_IMAGE_MAX_WIDTH_RATIO
+        : contentWidth
     const metrics = fitRatioRow(
       ratios,
       shouldFillPage ? PAGE_FILL_GALLERY_MAX_HEIGHT_MM : SINGLE_IMAGE_ROW_HEIGHT_MM,
-      shouldFillPage ? PAGE_FILL_GALLERY_CONTENT_WIDTH_MM : GALLERY_CONTENT_WIDTH_MM,
+      maxWidth,
     )
 
     return {
@@ -410,14 +416,6 @@ const imageRatios = reactive<Record<string, number>>({})
 <template>
   <main class="report-preview">
     <section class="toolbar">
-      <div>
-        <p class="eyebrow">A4 Report Preview</p>
-        <h1>成长记录册预览</h1>
-        <p>
-          共 {{ themes.length }} 个主题，{{ totalPages + tocPageOffset }} 页。点击浏览器打印可导出 PDF。
-          <span v-if="useMockData">当前为 {{ mockCount }} 条 mock 数据，{{ mockThemeCount }} 个 mock 主题。</span>
-        </p>
-      </div>
       <button type="button" @click="printReport">打印 / 导出 PDF</button>
     </section>
 

@@ -178,6 +178,12 @@ function textCapacityChars(remainingHeight: number, isTextContinuation: boolean)
   return firstLineChars + Math.max(0, lineCount - 1) * STORY_TEXT_LINE_CHARS
 }
 
+function canUseReservedTextCapacity(text: string, capacity: number) {
+  const textLength = text.trimStart().length
+
+  return textLength > 0 && (textLength <= capacity || capacity >= MIN_TEXT_SLICE_CHARS)
+}
+
 function estimatedLineBounds(breakAt: number, isTextContinuation: boolean) {
   const firstLineChars = isTextContinuation ? STORY_TEXT_LINE_CHARS : STORY_TEXT_FIRST_LINE_CHARS
 
@@ -442,10 +448,27 @@ export function buildReportPages(themes: ReportTheme[]) {
         }
 
         const textGapHeight = includeHeader && remainingText ? FLOW_GAP_MM : 0
-        const maxTextChars = textCapacityChars(
+        const defaultMaxTextChars = textCapacityChars(
           availableAfterHeader - textGapHeight,
           isTextContinuation,
         )
+        const shouldReserveSingleImage =
+          includeHeader && remainingText.length > 0 && remainingImages.length === 1
+        const singleImageReservedHeight = shouldReserveSingleImage
+          ? galleryHeight(remainingImages) + FLOW_GAP_MM
+          : 0
+        const singleImageMaxTextChars = shouldReserveSingleImage
+          ? textCapacityChars(
+              availableAfterHeader - textGapHeight - singleImageReservedHeight,
+              isTextContinuation,
+            )
+          : 0
+        const maxTextChars = canUseReservedTextCapacity(
+          remainingText,
+          singleImageMaxTextChars,
+        )
+          ? singleImageMaxTextChars
+          : defaultMaxTextChars
         const { current: textPart, next: nextText, continues: continuesText } = splitText(
           remainingText,
           maxTextChars,

@@ -19,6 +19,7 @@ const PAGE_FILL_GALLERY_MAX_HEIGHT_MM = 248
 const GALLERY_CONTENT_WIDTH_MM = 154
 const PAGE_FILL_GALLERY_CONTENT_WIDTH_MM = 168
 const FLOW_GAP_MM = 4
+const FRONT_COVER_PAGE_COUNT = 1
 
 interface MosaicItem {
   image: ReportImage
@@ -45,7 +46,7 @@ const themes = useMockData
   : (reportData as ReportTheme[])
 const { pages, toc, totalPages } = buildReportPages(themes)
 const tocPages = paginateToc(toc)
-const tocPageOffset = tocPages.length
+const tocPageOffset = FRONT_COVER_PAGE_COUNT + tocPages.length
 
 function readPositiveIntegerParam(name: string, fallback: number, max: number) {
   const rawValue = searchParams.get(name)
@@ -419,6 +420,8 @@ const imageRatios = reactive<Record<string, number>>({})
       </div>
       <button type="button" @click="printReport">打印 / 导出 PDF</button>
     </section>
+
+    <section class="sheet front-cover-sheet" aria-label="首页" />
 
     <section v-for="(tocPage, tocPageIndex) in tocPages" :key="`toc-${tocPageIndex}`" class="sheet toc-sheet">
       <div class="toc-card">

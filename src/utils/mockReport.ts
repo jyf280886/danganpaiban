@@ -17,6 +17,18 @@ const textSeeds = [
   "老师鼓励孩子们用眼睛看、用小手摸、用语言说，把日常生活中的经验变成一次完整的学习旅程。每一次尝试和交流，都让活动变得更加生动。",
   "爸爸妈妈也参与到活动中，陪孩子一起寻找秋天、记录秋天，把亲子陪伴留在照片和文字里。温暖的互动，让成长故事更有意义。",
 ];
+const MOCK_THEME_TITLE_MAX_CHARS = 5;
+
+function limitTextLength(text: string, maxChars: number) {
+  return Array.from(text).slice(0, maxChars).join("");
+}
+
+function createMockThemeTitle(themeIndex: number) {
+  return limitTextLength(
+    `主题${String(themeIndex + 1).padStart(2, "0")}`,
+    MOCK_THEME_TITLE_MAX_CHARS,
+  );
+}
 
 function repeatText(seedIndex: number, repeat: number) {
   return Array.from(
@@ -81,7 +93,10 @@ export function createMockReportData(
       return {
         theme: `${baseTheme.theme}-mock-${themeIndex + 1}`,
         background: baseTheme.background,
-        header: baseTheme.header,
+        header: {
+          ...baseTheme.header,
+          title: createMockThemeTitle(themeIndex),
+        },
         pages: [],
       };
     }
@@ -90,7 +105,7 @@ export function createMockReportData(
       theme: `${baseTheme.theme}-mock-${themeIndex + 1}`,
       background: baseTheme.background,
       header: {
-        title: `${baseTheme.header.title} · 动态主题 ${themeIndex + 1}`,
+        title: createMockThemeTitle(themeIndex),
         subtitle: baseTheme.header.subtitle,
         description: `${baseTheme.header.description}${textSeeds[themeIndex % textSeeds.length] ?? textSeeds[0] ?? ""}`,
       },

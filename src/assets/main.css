@@ -129,6 +129,13 @@ button {
   padding: 34mm 20mm 16mm;
 }
 
+.front-cover-sheet {
+  background-image: url('/images/shouye.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .toc-sheet {
   display: flex;
   flex-direction: column;

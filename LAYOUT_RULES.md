@@ -532,6 +532,17 @@ mock 应覆盖：
 src/
   App.vue
   main.ts
+  components/
+    report/
+      ReportPreview.vue
+      PrintToolbar.vue
+      FrontCoverSheet.vue
+      TocSheet.vue
+      ReportPageSheet.vue
+      ThemeCover.vue
+      ContentPage.vue
+      StoryBlock.vue
+      GalleryView.vue
   assets/
     base.css
     main.css
@@ -548,7 +559,13 @@ README.md
 
 核心职责：
 
-- `src/App.vue`：读取数据、处理 mock 参数、生成目录分页、渲染页面、计算实际图库尺寸、触发打印。
+- `src/App.vue`：应用入口，只挂载 `ReportPreview`，不要放业务功能和排版逻辑。
+- `src/components/report/ReportPreview.vue`：读取数据、处理 mock 参数、调用分页、生成目录分页、触发打印。
+- `src/components/report/TocSheet.vue`：渲染目录页和最终页码。
+- `src/components/report/ReportPageSheet.vue`：渲染主题封面页或内容页，并注入页面背景变量。
+- `src/components/report/ContentPage.vue`：渲染内容页容器，判断纯图片满页场景。
+- `src/components/report/StoryBlock.vue`：渲染单条文章切片、标题、日期、正文和图库入口。
+- `src/components/report/GalleryView.vue`：读取图片真实比例，计算单图、竖图、多图和满页图库尺寸。
 - `src/types/report.ts`：定义主题、文章、图片、页面和切片类型。
 - `src/utils/pagination.ts`：实现分页、文本拆分、图片容量估算、目录项生成、背景选择。
 - `src/utils/mockReport.ts`：生成 mock 主题、文章、正文和图片。
@@ -610,5 +627,5 @@ npm run build
 
 支持 ?mock=40&themes=5 生成 mock 数据。mock 主题标题必须控制在 5 个字以内，并覆盖长中文、标点、短尾巴、单图、竖图、多图和纯图片续页场景。
 
-请提供 src/App.vue、src/types/report.ts、src/utils/pagination.ts、src/utils/mockReport.ts、src/assets/main.css、README.md，并确保 npm run build 通过。
+请提供 src/App.vue、src/components/report/*、src/types/report.ts、src/utils/pagination.ts、src/utils/mockReport.ts、src/assets/main.css、README.md，并确保 npm run build 通过。App.vue 只能作为入口挂载组件，不要承载业务功能和排版逻辑。
 ```

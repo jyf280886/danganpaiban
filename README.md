@@ -59,7 +59,8 @@ npm run preview
 ## 主要文件
 
 - `api.json`：真实报表数据源。
-- `src/App.vue`：报表预览主组件。
+- `src/App.vue`：应用入口，只挂载报表预览组件。
+- `src/components/report/`：报表预览、工具栏、首页、目录页、主题页、内容页、文章块和图库组件。
 - `src/types/report.ts`：报表数据类型。
 - `src/utils/pagination.ts`：正文分页、目录项和背景图选择逻辑。
 - `src/utils/mockReport.ts`：mock 主题和文章生成逻辑。

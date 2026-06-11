@@ -42,7 +42,16 @@ npm run preview
 核心文件：
 
 - `src/main.ts`：创建 Vue 应用，注册 Pinia，挂载 `App.vue`。
-- `src/App.vue`：报表预览主组件，负责读取数据、处理 URL 参数、生成目录分页、渲染页面、计算图库尺寸和触发打印。
+- `src/App.vue`：应用入口，只挂载报表预览组件。
+- `src/components/report/ReportPreview.vue`：报表预览主组件，负责读取数据、处理 URL 参数、调用分页、生成目录分页和触发打印。
+- `src/components/report/PrintToolbar.vue`：右侧悬浮打印按钮。
+- `src/components/report/FrontCoverSheet.vue`：首页封面页。
+- `src/components/report/TocSheet.vue`：目录页渲染和最终页码格式化。
+- `src/components/report/ReportPageSheet.vue`：主题封面页和内容页的页面外壳、背景变量和页脚。
+- `src/components/report/ThemeCover.vue`：主题封面内容。
+- `src/components/report/ContentPage.vue`：内容页容器和纯图片满页判断。
+- `src/components/report/StoryBlock.vue`：文章标题、日期、正文和图库入口。
+- `src/components/report/GalleryView.vue`：图片真实比例读取、单图和多图图库尺寸计算。
 - `src/types/report.ts`：报表相关 TypeScript 类型。
 - `src/utils/pagination.ts`：报表正文分页、文章切片、目录项生成、主题/内容背景图选择和基础图库分类。
 - `src/utils/mockReport.ts`：基于真实数据扩展 mock 主题、文章、文本和图片。
@@ -52,7 +61,7 @@ npm run preview
 
 模板工程遗留文件仍存在：
 
-- `src/components/*`
+- `src/components/HelloWorld.vue`、`src/components/TheWelcome.vue`、`src/components/WelcomeItem.vue` 和 `src/components/icons/*`
 - `src/stores/counter.ts`
 - `src/assets/base.css` 中的部分 Vue 模板默认变量
 
@@ -105,10 +114,10 @@ interface ReportTheme {
 
 ## 数据来源和 mock 参数
 
-`src/App.vue` 默认读取 `api.json`：
+`src/components/report/ReportPreview.vue` 默认读取 `api.json`：
 
 ```ts
-import reportData from '../api.json'
+import reportData from '../../../api.json'
 ```
 
 如果 URL 中带有 `mock` 参数，则使用 `src/utils/mockReport.ts` 生成 mock 数据：
@@ -197,22 +206,25 @@ mock 数据会复用 `api.json` 中的主题背景、副标题和基础文章，
 
 ## 目录实现
 
-正文分页完成后，`src/App.vue` 会调用本地的 `paginateToc(toc)` 生成目录页。
+正文分页完成后，`src/components/report/ReportPreview.vue` 会调用本地的 `paginateToc(toc)` 生成目录页。
 
 目录规则：
 
-- 每页最多 `20` 条目录项。
+- 每页最多 `32` 条目录项。
 - 如果主题项后面紧跟文章项，但当前目录页已没有足够空间容纳两条，会提前换页，避免主题标题孤立在页尾。
 - 目录页数量会作为 `tocPageOffset` 加到正文页码上，所以目录中显示的是最终打印页码。
 - 目录页 footer 只显示目录页自己的页码。
 
 ## 渲染实现
 
-`src/App.vue` 渲染三类区域：
+报表渲染已拆到 `src/components/report/`：
 
-- 顶部工具栏：显示主题数量、总页数、mock 状态和打印按钮。
-- 目录页：循环 `tocPages` 生成一页或多页目录。
-- 正文页：循环 `pages` 生成主题封面页或内容页。
+- `ReportPreview.vue`：组织工具栏、首页、目录页和正文页。
+- `PrintToolbar.vue`：只显示打印按钮。
+- `FrontCoverSheet.vue`：渲染首页。
+- `TocSheet.vue`：循环目录项，显示最终打印页码。
+- `ReportPageSheet.vue`：循环 `pages`，渲染主题封面页或内容页。
+- `ContentPage.vue` 和 `StoryBlock.vue`：渲染文章切片、正文和图库入口。
 
 正文页通过 CSS 变量接收背景：
 
@@ -232,7 +244,7 @@ mock 数据会复用 `api.json` 中的主题背景、副标题和基础文章，
 - `gallery--single`：1 张图。
 - `gallery--mosaic`：2 张及以上多图。
 
-`src/App.vue` 会在图片加载后读取自然宽高比：
+`src/components/report/GalleryView.vue` 会在图片加载后读取自然宽高比：
 
 ```ts
 imageRatios[image.url] = target.naturalWidth / target.naturalHeight
@@ -286,7 +298,7 @@ imageRatios[image.url] = target.naturalWidth / target.naturalHeight
 ## 当前注意点
 
 - `Pinia` 已安装并注册，但当前没有业务状态依赖。
-- `src/components` 下仍有模板示例组件，当前主页面未引用。
+- `src/components/report` 是当前报表主流程组件；`src/components` 下的 Vue 模板示例组件当前未引用。
 - 图片路径使用 `/images/...`，需要确保部署环境能把仓库根目录下的 `images/` 作为静态资源提供；Vite 开发服务器当前可以直接访问这些资源。
 - 分页是基于权重的近似排版，不是按真实 DOM 高度测量；数据变化极端时仍需要视觉回归检查。
 - 当前没有提交包管理器锁文件，依赖安装结果可能随时间变化。
